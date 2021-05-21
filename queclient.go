@@ -19,6 +19,7 @@ var (
 func init() {
 	fileName := "/var/que2pauser/pauser.data"
 	_, err := os.Stat(fileName)
+	fmt.Println("Creating Pauser", err)
 	if err != nil {
 		data := `1 N
 2 N
@@ -155,7 +156,7 @@ func (qc *QueClient) Move(tolist, item string) error {
 	return nil
 }
 
-func (qv2c *QueClient) IsComponentPaused(c int) bool {
+func (qc *QueClient) IsComponentPaused(c int) bool {
 
 	fileName := "/var/que2pauser/pauser.data"
 	f, err := os.Open(fileName)
