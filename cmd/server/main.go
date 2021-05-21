@@ -92,5 +92,6 @@ func main() {
 	web.Delete("/", deleteitem)
 	web.Put("/", moveitem)
 	web.StopOnInt()
+	web.Production()
 	web.Listen(7676)
 }
