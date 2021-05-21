@@ -31,6 +31,7 @@ type QueClient struct {
 }
 
 func (qc *QueClient) Get(listname string) ([]string, error) {
+
 	finalURL := fmt.Sprintf("%s?%s", baseAddress, "l="+listname)
 
 	req, err := http.NewRequest("GET", finalURL, nil)
@@ -154,7 +155,7 @@ func (qc *QueClient) Move(tolist, item string) error {
 	return nil
 }
 
-func IsComponentPaused(c int) bool {
+func (qv2c *QueClient) IsComponentPaused(c int) bool {
 
 	fileName := "/var/que2pauser/pauser.data"
 	f, err := os.Open(fileName)
