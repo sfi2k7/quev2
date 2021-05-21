@@ -108,8 +108,8 @@ func (qc *QueClient) Remove(listname, item string) error {
 	return nil
 }
 
-func (qc *QueClient) Move(froml, tolist, item string) error {
-	finalURL := fmt.Sprintf("%s?%s", baseAddress, "fl="+froml+"&tl="+tolist+"&i="+item)
+func (qc *QueClient) Move(tolist, item string) error {
+	finalURL := fmt.Sprintf("%s?%s", baseAddress, "tl="+tolist+"&i="+item)
 
 	req, err := http.NewRequest("PUT", finalURL, nil)
 	if err != nil {

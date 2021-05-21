@@ -62,16 +62,15 @@ func deleteitem(c *picoweb.Context) {
 }
 
 func moveitem(c *picoweb.Context) {
-	fl := c.Query("fl")
 	tl := c.Query("tl")
 	item := c.Query("i")
 
-	if len(fl) == 0 || len(tl) == 0 || len(item) == 0 {
+	if len(tl) == 0 || len(item) == 0 {
 		c.Json(&quev2.ApiResponse{Error: "Must specify both from and to listnanes AND Item", Took: time.Since(c.Start).String()})
 		return
 	}
 
-	err := qdb.Move(fl, tl, item)
+	err := qdb.Move(tl, item)
 
 	if err != nil {
 		c.Json(&quev2.ApiResponse{Error: err.Error(), Took: time.Since(c.Start).String()})

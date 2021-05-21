@@ -59,29 +59,15 @@ func (qdb *Quedb) Remove(from, item string) error {
 	})
 }
 
-func (qdb *Quedb) Move(from, to, item string) error {
+func (qdb *Quedb) Move(to, item string) error {
 	return qdb.b.Update(func(tx *bolt.Tx) error {
-		fromB, _ := tx.CreateBucketIfNotExists([]byte(from))
+		fromB, _ := tx.CreateBucketIfNotExists([]byte("in_flight"))
 		toB, _ := tx.CreateBucketIfNotExists([]byte(to))
 
 		fromB.Delete([]byte(item))
 		toB.Put([]byte(item), []byte(""))
 		return nil
 	})
-}
-
-func (qdb *Quedb) GetAndMove(from, to string) ([]string, error) {
-
-	items, err := qdb.Get(from)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, item := range items {
-		qdb.Move(from, to, item)
-	}
-
-	return items, nil
 }
 
 func (qdb *Quedb) Get(listname string) ([]string, error) {
@@ -103,6 +89,12 @@ func (qdb *Quedb) Get(listname string) ([]string, error) {
 		})
 		return nil
 	})
+
+	for _, item := range result {
+		qdb.Set("in_flight", item)
+		qdb.Remove(listname, item)
+	}
+
 	//TODO: Delete Befoe Exit
 	return result, nil
 }
