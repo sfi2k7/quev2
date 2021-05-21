@@ -1,16 +1,31 @@
 package quev2
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"strconv"
+	"strings"
 )
 
 var (
 	baseAddress = "http://localhost:7676/"
 )
+
+func init() {
+	fileName := "/var/que2pauser/pauser.data"
+	_, err := os.Stat(fileName)
+	if err != nil {
+		data := `1 N
+2 N
+3 N`
+		ioutil.WriteFile(fileName, []byte(data), 0777)
+	}
+}
 
 type QueClient struct {
 }
@@ -137,4 +152,26 @@ func (qc *QueClient) Move(tolist, item string) error {
 	}
 
 	return nil
+}
+
+func IsComponentPaused(c int) bool {
+
+	fileName := "/var/que2pauser/pauser.data"
+	f, err := os.Open(fileName)
+	if err != nil {
+		return true
+	}
+	defer f.Close()
+
+	cid := strconv.Itoa(c)
+	scanner := bufio.NewScanner(f)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		splitted := strings.Split(line, " ")
+		if splitted[0] == cid && splitted[1] == "Y" {
+			return true
+		}
+	}
+	return false
 }
