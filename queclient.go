@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	baseAddress = "http://localhost:7676/"
+	baseAddress = "http://52.1.190.104:7676/"
 )
 
 func init() {
