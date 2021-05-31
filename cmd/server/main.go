@@ -79,6 +79,25 @@ func moveitem(c *picoweb.Context) {
 	c.Json(&quev2.ApiResponse{Success: true, Took: time.Since(c.Start).String()})
 }
 
+func browse(c *picoweb.Context) {
+	l := c.Query("l")
+	skip, _ := c.QueryInt("skip")
+	limit, _ := c.QueryInt("limit")
+
+	if len(l) == 0 {
+		c.Json(&quev2.ApiResponse{Error: "Must provide a valid listname", Took: time.Since(c.Start).String()})
+		return
+	}
+
+	items, err := qdb.List(skip, limit, l)
+	if err != nil {
+		c.Json(&quev2.ApiResponse{Error: "Error loading data from list:" + err.Error(), Took: time.Since(c.Start).String()})
+		return
+	}
+	c.Json(&quev2.ApiItemResponse{Result: items, Success: true, Took: time.Since(c.Start).String()})
+
+}
+
 func main() {
 	var err error
 	qdb, err = quev2.NewQDB()
@@ -91,6 +110,8 @@ func main() {
 	web.Post("/", setitem)
 	web.Delete("/", deleteitem)
 	web.Put("/", moveitem)
+	web.Get("/browse", browse)
+
 	web.StopOnInt()
 	web.Production()
 	web.Listen(7676)

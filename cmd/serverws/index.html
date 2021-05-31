@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>Hello World</h1>
+
+    <script>
+
+        class QueItem {
+            static FromJSON(json) {
+                let obj = JSON.parse(json);
+                return Object.assign(new QueItem(), obj);
+            }
+
+            toJSON() {
+                return this;
+            }
+
+            constructor() {
+                this.id = null;
+                this.action = null;
+                this.channel = null;
+                this.reserved = null;
+                this.reservedAt = null;
+                this.data = null;
+                this.added = null;
+                this.picked = null;
+                this.lastUpdated = null;
+                this.chain = null;
+            }
+        }
+
+
+        const Outgoing = (id, action, channel, data) => {
+            let c = Object.assign(new QueItem, { id, action, channel, data })
+            return JSON.stringify(c)
+        }
+
+        onload = () => {
+            const ws = new WebSocket("ws://localhost:7021/ws");
+            ws.onclose = (e) => {
+                console.log("Close", e);
+            }
+
+            ws.onerror = (e) => {
+                console.log("Error", e)
+            }
+
+            ws.onmessage = (e) => {
+                console.log("message", e.data)
+                let qi = QueItem.FromJSON(e.data)
+                if (qi.action == "sub_ok") {
+                    console.log("subscribed to", qi.channel)
+                    return
+                }
+
+                if (qi.action == "assigned") {
+                    ws.send(Outgoing(qi.id, "ack"))
+                    if (qi.channel == "new_items") {
+                        qi.channel = "old_items"
+                        qi.action = "route"
+                        qi.chain += "1|"
+                        ws.send(JSON.stringify(qi))
+                        return
+                    }
+                    console.log("Final Dest",qi)
+
+                    return
+                }
+
+                console.log(qi)
+            }
+
+            ws.onopen = (e) => {
+                ws.send(Outgoing("", "sub", "new_items", "nothing"))
+                ws.send(Outgoing("", "sub", "old_items", "nothing"))
+                ws.send(Outgoing("", "route", "new_items", "nothing"))
+            }
+        }
+    </script>
+</body>
+
+</html>

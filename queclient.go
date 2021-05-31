@@ -17,15 +17,15 @@ var (
 )
 
 func init() {
-	fileName := "/var/que2pauser/pauser.data"
-	_, err := os.Stat(fileName)
-	fmt.Println("Creating Pauser", err)
-	if err != nil {
-		data := `1 N
-2 N
-3 N`
-		ioutil.WriteFile(fileName, []byte(data), 0777)
-	}
+	// 	fileName := "/var/que2pauser/pauser.data"
+	// 	_, err := os.Stat(fileName)
+	// 	fmt.Println("Creating Pauser", err)
+	// 	if err != nil {
+	// 		data := `1 N
+	// 2 N
+	// 3 N`
+	// 		ioutil.WriteFile(fileName, []byte(data), 0777)
+	// 	}
 }
 
 type QueClient struct {

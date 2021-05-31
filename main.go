@@ -2,8 +2,10 @@ package quev2
 
 import (
 	"errors"
+	"strings"
 	"time"
 
+	uuid "github.com/satori/go.uuid"
 	bolt "go.etcd.io/bbolt"
 )
 
@@ -70,6 +72,37 @@ func (qdb *Quedb) Move(to, item string) error {
 	})
 }
 
+func (qdb *Quedb) List(skip, limit int, listname string) ([]*Item, error) {
+	var result []*Item
+
+	err := qdb.b.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(listname))
+		if b == nil {
+			return errors.New("channel does not exist")
+		}
+
+		c := b.Cursor()
+		x := 0
+		for {
+			k, v := c.Next()
+			if k == nil {
+				return nil
+			}
+
+			if skip > 0 && x < skip {
+				x++
+				continue
+			}
+
+			result = append(result, &Item{Listname: listname, Key: string(k), Value: string(v)})
+			if limit > 0 && len(result) == limit {
+				return nil
+			}
+		}
+	})
+	return result, err
+}
+
 func (qdb *Quedb) Get(listname string) ([]string, error) {
 	var result []string
 	qdb.b.View(func(tx *bolt.Tx) error {
@@ -116,4 +149,21 @@ func NewQDB(path ...string) (*Quedb, error) {
 		return nil, err
 	}
 	return &Quedb{b: db}, nil
+}
+
+type Item struct {
+	Listname string
+	Key      string
+	Value    string
+}
+
+type OutgoingMessage struct {
+	Action  string      `json:"action"`
+	Channel string      `json:"channel"`
+	Data    interface{} `json:"data"`
+}
+
+func NewV4() string {
+	v4 := uuid.NewV4()
+	return strings.Replace(v4.String(), "-", "", -1)
 }

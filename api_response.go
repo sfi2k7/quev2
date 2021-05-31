@@ -6,3 +6,10 @@ type ApiResponse struct {
 	Error   string
 	Took    string
 }
+
+type ApiItemResponse struct {
+	Result  []*Item
+	Success bool
+	Error   string
+	Took    string
+}

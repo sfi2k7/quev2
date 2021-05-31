@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    <title>Que Server</title>
+</head>
+
+<body style="text-align: center;">
+    <div style="text-align: left;margin: auto;width:500px">
+        <table>
+            <tbody>
+                <tr>
+                    <th>Connection Count</th>
+                    <td>{{ .connectionCount}}</td>
+                </tr>
+                <tr>
+                    <th>Items in Queue</th>
+                    <td>{{ .itemsInQue}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Channel</th>
+                    <th>Subscribers Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range $k,$v := .subCount}}
+                <tr>
+                    <td>{{$k}}</td>
+                    <td>{{$v}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Channel</th>
+                    <th>Is Paused</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range $k,$v := .channelPauseStatus}}
+                <tr>
+                    <td>{{$k}}</td>
+                    <td>{{$v}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+
+    <div id="mydiv"></div>
+
+    <script type="text/babel">
+    
+      class Hello extends React.Component {
+        constructor(props){
+            super(props);
+            this.ws = null;
+            this.state = {
+                ok:true
+            }
+            this.wsEvent = this.wsEvent.bind(this);
+        }
+
+        componentDidMount(){
+            this.ws = new WebSocket("ws://localhost:7021/ws")
+            this.ws.onclose = this.ws.onerror = this.ws.onmessage = this.ws.onopen = this.wsEvent
+        }
+
+        wsEvent(e){
+            if (e.type == "message"){
+                let one = JSON.parse(e.data);
+                console.log(one);
+                if (one.action == "welcome"){
+                    console.log("sending Sub")
+                    this.ws.send(JSON.stringify({ action:"sub", channel:"web" }))
+                }
+            }
+        }
+
+        render() {
+          return <h1>Hello World! { this.state.ok == true?"TRUE":"FALSE" }</h1>
+        }
+      }
+
+      ReactDOM.render(<Hello />, document.getElementById('mydiv'))
+    </script>
+</body>
+
+</html>

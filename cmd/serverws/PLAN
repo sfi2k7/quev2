@@ -1,0 +1,45 @@
+item {
+    ID 
+    target_channel | string | "ACK"
+    reserved
+    data
+    added time
+    picked time
+}
+
+open ws connection
+pick a channel or Two?
+client:
+    on_message:
+        check if item is work or ACK
+        if ACK:
+            remove item from local Cache
+
+        before process save item to local cache
+        
+        validate item with DB otherwise send to trash
+        process
+        send to another channel
+        on ACK:
+            remove from local cache
+        move on
+
+server:
+    on_message:
+        check if message is ACK:
+            if ACK:
+                remove message from local cache
+        check item target_channel
+        check if anybody is subscribed
+        otherwise save item in local cache
+        if subscribed:
+            send item to subscriber
+            on ACK Remove from local Cache
+
+cache: (id based) (mongo backed)
+    GetMessageFromChannelUnreserved()
+    GetMessageFromChannelAny()
+    MoveMessageToChannel()
+    RemoveMessage(s)()
+    PopMessageFromChannel() //Copied to in_flight
+    PushMessageFromChannel()
